@@ -20,8 +20,6 @@
 import os
 import sys
 import inspect
-from contextlib import contextmanager
-from importlib import import_module
 from textwrap import dedent
 
 
@@ -42,10 +40,11 @@ class CLIGenerator(object):
 
 		self.recurse_modules = recurse_modules
 
-		self.name = name or module_or_function.__name__
+		self.name = name or self.module_or_function.__name__
+
 		self.library_name = library_name or self.name
 
-		self.description = description or 'A CLI tool for {}'.format(library_name)
+		self.description = description or 'A CLI tool for {}'.format(self.library_name)
 
 		self.ignore_modules = ignore_modules or []
 		self.ignore_functions = ignore_functions or []
@@ -96,7 +95,7 @@ class CLIGenerator(object):
 		''').format(description=self.description,
 					usage=self.usage,
 					additional_imports='ADDITIONAL_IMPORTS',  # Don't replace now, since it'll be used again later
-					class_name=self.name.capitalize().replace('.', '_') + 'CLI')
+					class_name=self.name.capitalize().replace('-', '_').replace('.', '_') + 'CLI')
 
 	def _object_tree(self, obj):
 
@@ -121,7 +120,7 @@ class CLIGenerator(object):
 		return tree
 
 
-	def get_arguments(self, func):
+	def _get_arguments(self, func):
 
 		argc = func.__code__.co_argcount
 		argv = func.__code__.co_varnames[:argc]
@@ -137,7 +136,7 @@ class CLIGenerator(object):
 		return (argv, defaults)
 
 
-	def get_option_type(self, func, option):
+	def _get_option_type(self, func, option):
 
 		def _type_to_str(type_):
 			return repr(type_).replace('<class ', '').replace('>', '').replace("'", '').replace('Type', '')
@@ -154,14 +153,46 @@ class CLIGenerator(object):
 					return _type_to_str(self.option_types[option])
 
 				except KeyError:
-					if option in self.get_arguments(func)[1]:
-						return _type_to_str(type(self.get_arguments(func)[1][option]))
+					if option in self._get_arguments(func)[1]:
+						return _type_to_str(type(self._get_arguments(func)[1][option]))
 
 					else:
 						return None
 
+	def _get_function_description(self, func):
 
-	def generate_function(self, func):
+		try:
+			return self.help_strings[func.__module__][func.__name__]
+
+		except KeyError:
+			try:
+				return self.help_strings[func.__name__]
+
+			except KeyError:
+				if func.__doc__:
+					return func.__doc__.splitlines()[0] or func.__doc__.splitlines[1]
+
+				else:
+					return ''
+
+	def _get_option_help(self, func, option):
+
+		try:
+			return self.help_strings[func.__module__][func.__name__][option]
+
+		except KeyError:
+			try:
+				return self.help_strings[func.__name__][option]
+
+			except KeyError:
+				try:
+					return self.help_strings[option]
+
+				except KeyError:
+					return ''
+
+
+	def _generate_function(self, func):
 
 		func_name = '{}{}'.format(
 				func.__module__ + '.' if func.__module__ != '__main__' else '',
@@ -188,18 +219,18 @@ class CLIGenerator(object):
 
 		arg_defs = []
 
-		func_args, func_defaults = self.get_arguments(func)
+		func_args, func_defaults = self._get_arguments(func)
 
 		for i in func_args:
 			required = bool(i not in func_defaults)
 
 			additional_opts = ''
 
-			if self.get_option_type(func, i) is not None and self.get_option_type(func, i) != 'bool':
+			if self._get_option_type(func, i) is not None and self._get_option_type(func, i) != 'bool':
 				additional_opts += ', type={}'.format(
-						self.get_option_type(func, i))
+						self._get_option_type(func, i))
 
-			elif self.get_option_type(func, i) == 'bool':
+			elif self._get_option_type(func, i) == 'bool':
 				additional_opts += ', action=\'store_true\''
 
 			if not required:
@@ -209,6 +240,9 @@ class CLIGenerator(object):
 			if i.endswith('_') and not required:
 				additional_opts += ', dest=\'{}\''.format(i[:])
 				i = i[:-1]
+
+			if self._get_option_help(func, i):
+				additional_opts += ', help=\'{}\''.format(self._get_option_help(func, i))
 
 			arg_defs.append(arg_template.format(
 				arg_name=i if required else '--{}'.format(i.replace('_', '-')),
@@ -223,7 +257,7 @@ class CLIGenerator(object):
 
 		return dedent(template.format(
 				name=fmt_func_name.replace('.', '_'),
-				description='',
+				description=self._get_function_description(func),
 				arg_defs='\n\t\t\t\t'.join(arg_defs) or '',
 				function_call=function_call))
 
@@ -254,13 +288,15 @@ class CLIGenerator(object):
 							_recurse_code_update(tree[i][1])
 
 					else:
-						function_code = self.generate_function(tree[i]).splitlines()
+						function_code = self._generate_function(tree[i]).splitlines()
 						function_code[0] = '\t' + function_code[0]
 						code += '\n\t'.join(function_code)
 
 						code += '\n\n'
 
 			_recurse_code_update(module_tree)
+
+			call_obj = self.name.capitalize.replace('-', '_').replace('.', '_') + 'CLI'
 
 
 		else:
@@ -283,21 +319,26 @@ class CLIGenerator(object):
 
 			code = code.replace('ADDITIONAL_IMPORTS', '\n' + '\n'.join(self.additional_imports) + '\n' + func_code + '\n')
 
-			function_code = self.generate_function(self.module_or_function).splitlines()
-			function_code[0] = '\t' + function_code[0]
+			function_code = dedent(self._generate_function(self.module_or_function))
 
-			code += '\n\t'.join(function_code)
+			function_code = function_code.replace('def {}(self)'.format(self._name), 'def {}()'.format('__' + self._name + 'CLI'))
+
+			function_code = function_code.replace('argparse.ArgumentParser(description=\'\')',
+					'argparse.ArgumentParser(description=\'{}\')'.format(self.description))  # Won't do anything if specified already
+
+			code = code.split('class {}(object)'.format(self.name.capitalize().replace('-', '_').replace('.', '_') + 'CLI'), 1)[0]
+
+			code += function_code
 
 			code += '\n\n'
 
-			code = code.replace('self._one_func_mode = False',
-					'if not hasattr(self, args.command.replace(\'_\', \'-\')): \n\t\t\targs.command = \'{}\'\n\n\t\tself._one_func_mode = True'.format(self._name, self._name))
+			call_obj = '__' + self._name + 'CLI'
 
 		code += dedent('''
 
 		if __name__ == '__main__':
 			{}()
-		'''.format(self.name.capitalize().replace('.', '_') + 'CLI'))
+		'''.format(call_obj))
 
 		return code
 
