@@ -35,25 +35,30 @@ Now our CLI program is in `test_prog.py`.
 **Running the CLI:**
 
 ```bash
-$ python3 test_prog.py --num-b 7
-12
-
-$ python3 test_prog.py --num-b 7
+$ python3 test_prog.py
+usage: test_prog.py [-h] [--num-b NUM_B] num_a
 test_prog.py: error: the following arguments are required: num_a
 
-$ python3 test_prog.py 5
-8
-
 $ python3 test_prog.py --help
-usage: test_prog.py command options
+usage: test_prog.py [-h] [--num-b NUM_B] num_a
 
 A CLI tool for my_function
 
 positional arguments:
-  command     Command to run.
+  num_a
 
 optional arguments:
-  -h, --help
+  -h, --help     show this help message and exit
+  --num-b NUM_B
+
+$ python3 test_prog.py 5
+8
+
+$ python3 test_prog.py 5 --num-b 2
+7
+
+$ python3 test_prog.py 10 --num-b 4
+14
 ```
 
 ### From module

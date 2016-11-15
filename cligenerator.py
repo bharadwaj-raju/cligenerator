@@ -328,7 +328,11 @@ class CLIGenerator(object):
 
 			code = code.split('class {}(object)'.format(self.name.capitalize().replace('-', '_').replace('.', '_') + 'CLI'), 1)[0]
 
+			to_remove = '''\tif self._one_func_mode:\n\t\targs = parser.parse_args(sys.argv[1:])\n\n\telse:\n\t\targs = parser.parse_args(sys.argv[2:])'''
+
 			code += function_code
+
+			code = code.replace(to_remove, '\n\targs = parser.parse_args()')
 
 			code += '\n\n'
 
