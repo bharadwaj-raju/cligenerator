@@ -179,7 +179,7 @@ You can nest it so:
 
 - module → function → option : type
 - function → option : type
-- option : help
+- option : type
 
 (Where 'type' is a `class` of a type, like `int`, `str`, etc. *NOTE:* It is like `int`, *not* like `'int'` (i.e. *not* the class name in a `str`))
 
