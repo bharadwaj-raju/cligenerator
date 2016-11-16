@@ -92,7 +92,7 @@ def untab(text):
 import mymodule
 import cligenerator
 
-cligen = cligenerator.generate()
+cligen = cligenerator.CLIGenerator(mymodule)
 
 with open('test_prog.py', 'w') as test_prog_file:
 	test_prog_file.write(cligen.generate())
