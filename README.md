@@ -15,7 +15,7 @@ Use `pip`!
 CLI Generator is implemented as a class, `CLIGenerator`.
 
 To use, simply pass a function or module object to a new instance
-(like: `gen = CLIGenerator(my_function_or_module)`), then you can get the code through `generate()` (like: `print(gen.generate())`).
+(like: `gen = cligenerator.CLIGenerator(my_function_or_module)`), then you can get the code through `generate()` (like: `print(gen.generate())`).
 
 ## Examples
 
@@ -111,7 +111,7 @@ Hello, World!
 $ python3 test_prog.py greet --world 'everyone!'
 Hello, everyone!
 
-$ python3 test_prog.py --hello 'Bye' --world 'everyone!'
+$ python3 test_prog.py greet --hello 'Bye' --world 'everyone!'
 Bye, everyone!
 
 $ python3 test_prog.py tab 'Hello'
