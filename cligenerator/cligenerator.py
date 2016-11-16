@@ -224,14 +224,22 @@ class CLIGenerator(object):
 		for i in func_args:
 			required = bool(i not in func_defaults)
 
+			option_type = self._get_option_type(func, i)
+
 			additional_opts = ''
 
-			if self._get_option_type(func, i) is not None and self._get_option_type(func, i) != 'bool':
+			if option_type is not None and option_type != 'bool':
 				additional_opts += ', type={}'.format(
-						self._get_option_type(func, i))
+						option_type if option_type != 'dict' else 'json.loads')
 
-			elif self._get_option_type(func, i) == 'bool':
+			elif option_type == 'bool':
 				additional_opts += ', action=\'store_true\''
+
+			if option_type == 'list':
+				additional_opts += ', nargs=\'*\''  # nargs=* is zero or more values
+
+			if option_type == 'dict':
+				self.additional_imports.append('json')
 
 			if not required:
 				additional_opts += ', default={}'.format(

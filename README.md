@@ -4,6 +4,12 @@ Generate intuitive CLI frontends/tools from your Python module or function.
 
 **License:** MIT
 
+## Installation
+
+Use `pip`!
+
+    $ pip install cligenerator
+
 ## Usage
 
 CLI Generator is implemented as a class, `CLIGenerator`.
