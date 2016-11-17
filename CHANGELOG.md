@@ -5,6 +5,17 @@ All notable changes will be documented here.
 Format adheres to Keep a Changelog (keepachangelog.com).
 Versioning adheres to Semantic Versioning (semver.org).
 
+## [1.0.2] - 2016-11-17
+
+### Added
+
+- PEP8 compatibility! (Well, mostly.)
+- Tests
+
+### Changed
+
+- Fix indentation bugs
+
 ## [1.0.1] - 2016-11-16
 
 ### Added

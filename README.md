@@ -83,7 +83,7 @@ def tab(text):
 	return '\t' + text
 
 def untab(text):
-	return tab.lstrip('\\t').lstrip()
+	return text.lstrip('\\t').lstrip()
 ```
 
 **Making the CLI:**
