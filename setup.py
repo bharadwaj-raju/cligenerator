@@ -1,7 +1,7 @@
 from distutils.core import setup
 import subprocess as sp
 
-version = '1.0.1'
+version = '1.0.2'
 
 setup(
 	name='cligenerator',
