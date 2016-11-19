@@ -117,7 +117,7 @@ Bye, everyone!
 $ python3 test_prog.py tab 'Hello'
 	Hello
 
-$ python3 test_prog.py detab '	Hello'
+$ python3 test_prog.py untab '	Hello'
 Hello
 ```
 
