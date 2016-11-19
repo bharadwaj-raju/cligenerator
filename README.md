@@ -2,6 +2,8 @@
 
 Generate intuitive CLI frontends/tools from your Python module or function.
 
+[![Test build status (Travis CI)](https://api.travis-ci.org/bharadwaj-raju/cligenerator.svg?branch=master)](https://travis-ci.org/bharadwaj-raju/cligenerator)
+
 **License:** MIT
 
 ## Installation
