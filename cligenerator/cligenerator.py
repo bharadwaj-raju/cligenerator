@@ -152,7 +152,8 @@ class CLIGenerator(object):
 
         def _type_to_str(type_):
             return repr(type_).replace('<class ', '').replace(
-                '>', '').replace("'", '').replace('Type', '')
+                '>', '').replace("'", '').replace('Type', '').replace('<type ',
+                                                                      '')
 
         try:
             return _type_to_str(self.option_types[func.__module__][
@@ -253,7 +254,8 @@ class CLIGenerator(object):
                 additional_opts += ', action=\'store_true\''
 
             if option_type == 'list':
-                additional_opts += ', nargs=\'*\''  # nargs=* is zero or more values
+                additional_opts += ', nargs=\'*\''  
+                # nargs=* is zero or more values
 
             if option_type == 'dict':
                 self.additional_imports.append('json')
