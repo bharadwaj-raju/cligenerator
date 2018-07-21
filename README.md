@@ -1,3 +1,6 @@
+# CLI Generator has moved!
+# Now at GitLab: https://gitlab.com/bharadwaj-raju/cligenerator
+
 # CLI Generator
 
 Generate intuitive CLI frontends/tools from your Python module or function.
